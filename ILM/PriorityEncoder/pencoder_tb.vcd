@@ -1,0 +1,81 @@
+$date
+	Sat Mar  8 13:31:53 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module PEncoder_tb $end
+$var wire 3 ! O [2:0] $end
+$var reg 8 " A [7:0] $end
+$scope module uut $end
+$var wire 8 # A [7:0] $end
+$var wire 1 $ temp1 $end
+$var wire 1 % temp2 $end
+$var wire 1 & temp3 $end
+$var wire 1 ' temp4 $end
+$var wire 1 ( temp5 $end
+$var wire 3 ) out [2:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b0 )
+0(
+0'
+0&
+0%
+0$
+b0 #
+b0 "
+b0 !
+$end
+#10000
+b1 "
+b1 #
+#20000
+b1 !
+b1 )
+1$
+b10 "
+b10 #
+#30000
+b101 !
+b101 )
+1&
+1(
+b100011 "
+b100011 #
+#40000
+b110 !
+b110 )
+0$
+0&
+1'
+0(
+b1000000 "
+b1000000 #
+#50000
+b111 !
+b111 )
+1(
+b10000000 "
+b10000000 #
+#60000
+1$
+1%
+1&
+b11111010 "
+b11111010 #
+#70000
+0&
+0(
+b1001001 "
+b1001001 #
+#80000
