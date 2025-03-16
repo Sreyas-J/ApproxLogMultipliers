@@ -63,7 +63,7 @@ int mitchell_multiply(int a, int b) {
 
 int main() {
     // Example test cases
-    int test_cases[][2] = {{13, 13}, {3, 3}, {15, 7}, {25, 25}, {-15, 7}, {15, -7}, {-15, -7}, {21, 12}};
+    int test_cases[][2] = {{5, 3}, {15, 5}, {20, 4}, {8, 2}, {50, 7}, {25, 6}, {0, 18}, {1, 1},{253,253}};
     
     for (auto& tc : test_cases) {
         int a = tc[0], b = tc[1];

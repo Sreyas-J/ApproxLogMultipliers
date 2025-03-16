@@ -41,20 +41,28 @@ endmodule
 
 module Barrel16L(
     input [15:0] data_i,
-    input [2:0] shift_i,
+    input [3:0] shift_i,
     output reg [15:0] data_o
     );	 
  
    always @*
       case (shift_i)
-         3'd0: data_o = data_i;
-         3'd1: data_o = data_i << 1;
-         3'd2: data_o = data_i << 2;
-         3'd3: data_o = data_i << 3;
-         3'd4: data_o = data_i << 4;
-         3'd5: data_o = data_i << 5;
-         3'd6: data_o = data_i << 6;
-         3'd7: data_o = data_i << 7;
+         4'd0: data_o = data_i;
+         4'd1: data_o = data_i << 1;
+         4'd2: data_o = data_i << 2;
+         4'd3: data_o = data_i << 3;
+         4'd4: data_o = data_i << 4;
+         4'd5: data_o = data_i << 5;
+         4'd6: data_o = data_i << 6;
+         4'd7: data_o = data_i << 7;
+         4'd8: data_o = data_i<<8;
+         4'd9: data_o = data_i << 9;
+         4'd10: data_o = data_i << 10;
+         4'd11: data_o = data_i << 11;
+         4'd12: data_o = data_i << 12;
+         4'd13: data_o = data_i << 13;
+         4'd14: data_o = data_i << 14;
+         4'd15: data_o = data_i << 15;
       endcase
 
 endmodule
@@ -62,7 +70,7 @@ endmodule
 
 module carry_lookahead_inc(
     input [2:0] i_add1,
-    output [2:0] o_result
+    output [3:0] o_result
 );
     
     wire [2:0] carry;
@@ -79,7 +87,7 @@ module carry_lookahead_inc(
     assign sum[2] = i_add1[2] ^ carry[2];
 
     // Output the incremented result
-    assign o_result = sum;
+    assign o_result = {carry[2],sum};
     
 endmodule
 
@@ -95,9 +103,15 @@ module AntiLog(
     wire [15:0] l1_in;
     assign l1_in = {8'b0, 1'b1, data_i[6:0]};  // 8 + 1 + 7 = 16 bits
 
-    wire [2:0] k_enc, k_enc_inc;
-    assign k_enc = data_i[9:7];  // Extract exponent
-    assign k_enc_inc = k_enc + 3'b001;  // Simple increment
+    wire [2:0] k_enc;
+    wire [3:0] k_enc_inc;
+    assign k_enc = {1'b0,data_i[9:7]};  // Extract exponent
+    // assign k_enc_inc = k_enc + 3'b001;  // Simple increment
+
+    carry_lookahead_inc inc(
+        .i_add1(k_enc),
+        .o_result(k_enc_inc)
+    );
 
     wire [15:0] l1_out;
     Barrel16L L1shift (
@@ -113,7 +127,7 @@ module AntiLog(
     assign r_in = {1'b1, data_i[6:0]};  // 1 + 7 = 8 bits
 
     wire [2:0] enc;
-    assign enc = ~data_i[9:7] + 3'b001;  // Compute correct right-shift amount
+    assign enc = ~data_i[9:7];  // Compute correct right-shift amount
 
     wire [7:0] r_out;
     Barrel8R Rshift (
@@ -125,10 +139,10 @@ module AntiLog(
     // -------------------------------
     // Output Selection
     // -------------------------------
-    wire [7:0] out_msb, out_lsb;
+    // wire [7:0] out_msb, out_lsb;
     
-    assign out_msb = data_i[10] ? l1_out[15:8] : 8'd0;  // Correct upper bits
-    assign out_lsb = data_i[10] ? l1_out[7:0] : r_out;  // Select lower bits
+    // assign out_msb = data_i[10] ? l1_out[15:8] : 8'd0;  // Correct upper bits
+    // assign out_lsb = data_i[10] ? l1_out[7:0] : r_out;  // Select lower bits
     
     assign data_o = data_i[10] ? l1_out : {8'd0, r_out};  // Full selection
 

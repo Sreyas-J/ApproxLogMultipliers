@@ -44,16 +44,16 @@ module MITCHEL_tb;
                  $time, x, y, p,A,B,LODa,LODb,kA,kB,op1,op2,L,tmp_out);
         
         // Apply test cases (8-bit unsigned numbers)
-        x = 9'd5;  y = 8'd3;  #10;
-        x = 9'd15; y = 8'd5;  #10;
-        x = 9'd20; y = 8'd4;  #10;
-        x = 9'd8;  y = 8'd2;  #10;
-        x = 9'd50; y = 8'd7;  #10;
-        x = 9'd25; y = 8'd6;  #10;
-        x = 9'd129; y = 8'd65;  #10;
-        x = 9'd0;  y = 8'd18; #10;
-        x = 9'd1;  y = 8'd1;  #10;
-        x = 9'd255; y = 8'd255; #10;
+        x = 9'd5;  y = 9'd3;  #10;
+        x = 9'd15; y = 9'd5;  #10;
+        x = 9'd20; y = 9'd4;  #10;
+        x = 9'd8;  y = 9'd2;  #10;
+        x = 9'd50; y = 9'd7;  #10;
+        x = 9'd25; y = 9'd6;  #10;
+        x = 9'd129; y = 9'd65;  #10;
+        x = 9'd0;  y = 9'd18; #10;
+        x = 9'd1;  y = 9'd1;  #10;
+        x = 9'd253; y = 9'd253; #10;
 
         // End simulation
         $finish;
