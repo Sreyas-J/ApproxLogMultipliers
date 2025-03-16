@@ -135,14 +135,6 @@ module AntiLog(
         .shift_i(enc),
         .data_o(r_out)
     );
-
-    // -------------------------------
-    // Output Selection
-    // -------------------------------
-    // wire [7:0] out_msb, out_lsb;
-    
-    // assign out_msb = data_i[10] ? l1_out[15:8] : 8'd0;  // Correct upper bits
-    // assign out_lsb = data_i[10] ? l1_out[7:0] : r_out;  // Select lower bits
     
     assign data_o = data_i[10] ? l1_out : {8'd0, r_out};  // Full selection
 
@@ -188,13 +180,26 @@ module LOD4(
     wire mux1;
     wire mux2;
     
-    assign mux2 = (data_i[3] == 1) ? 1'b0 : 1'b1;
-    assign mux1 = (data_i[2] == 1) ? 1'b0 : mux2;
-    assign mux0 = (data_i[1] == 1) ? 1'b0 : mux1;
+    assign mux2 = data_i[3] ? 1'b0 : 1'b1;
+    assign mux1 = data_i[2] ? 1'b0 : mux2;
+    assign mux0 = data_i[1] ? 1'b0 : mux1;
     
     assign data_o[3] = data_i[3];
     assign data_o[2] = (mux2 & data_i[2]);
     assign data_o[1] = (mux1 & data_i[1]);
+    assign data_o[0] = (mux0 & data_i[0]);
+endmodule
+
+
+module LOD2(
+    input [1:0] data_i,
+    output [1:0] data_o
+    ); 
+    wire mux0;
+
+    assign mux0 = data_i[1] ? 1'b0 : 1'b1;
+
+    assign data_o[1] = data_i[1];
     assign data_o[0] = (mux0 & data_i[0]);
 endmodule
 
@@ -219,8 +224,8 @@ module LOD(
         .data_o(z[3:0])
     );
 
-    LOD4 lod4_middle (
-        .data_i({2'b00, zdet}),  // Expand zdet to 4-bit
+    LOD2 lod4_middle (
+        .data_i( zdet),  // Expand zdet to 4-bit
         .data_o(select) // Expand select to match 4-bit output
     );
 
@@ -246,21 +251,21 @@ endmodule
 module MITCHEL(
     input [8:0] x,
     input [8:0] y,
-    output [16:0] p,
+    output [16:0] p
 
-    output [7:0] A,B,
-    output [7:0] LODa,LODb,
-    output [2:0] kA, kB,   // Expose kA and kB
-    output [10:0] op1, op2, L,  // Expose internal values
-    output [15:0] tmp_out 
+    // output [7:0] A,B,
+    // output [7:0] LODa,LODb,
+    // output [2:0] kA, kB,   // Expose kA and kB
+    // output [10:0] op1, op2, L,  // Expose internal values
+    // output [15:0] tmp_out 
     );
 
-    // wire [7:0] A,B;
+    wire [7:0] A,B;
     assign A=x[7:0];
     assign B=y[7:0];
 
-    // wire [7:0] LODa,LODb;
-    // wire [2:0] kA,kB;
+    wire [7:0] LODa,LODb;
+    wire [2:0] kA,kB;
     wire zeroA,zeroB;
 
     LOD lodA(A,zeroA,LODa);
@@ -291,7 +296,7 @@ module MITCHEL(
 		.data_o(barrelB)
  	 );
 
-    // wire [10:0] op1,op2,L;
+    wire [10:0] op1,op2,L;
 
     assign op1={1'b0,kA,barrelA[6:0]};
     assign op2={1'b0,kB,barrelB[6:0]};
