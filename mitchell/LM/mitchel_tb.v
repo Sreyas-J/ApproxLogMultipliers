@@ -11,18 +11,21 @@ module MITCHEL_tb;
     // wire [2:0] kA, kB;
     // wire [10:0] op1, op2, L;
     // wire [15:0] tmp_out;
+    // wire prod_sign;
 
     // Intermediate signals for signed values
     // integer signed_in1, signed_in2, signed_product;
-
+    reg [16:0] signed_product;
     // Instantiate the ILM module
     MITCHEL uut (
         .x(x), 
         .y(y), 
         .p(p)
+        // .prod_sign(prod_sign),
+        // .tmp_out(tmp_out),
 
         // .A(A),
-        // .B(B),
+        // .B(B)
         // .LODa(LODa),
         // .LODb(LODb),
         // .kA(kA), 
@@ -41,80 +44,36 @@ module MITCHEL_tb;
 
         // Monitor output
         $monitor("Time = %0t | x = %b (%d), y = %b (%d) | Product = %b (%d)", 
-                 $time, x,x, y,y , p, p);
+                 $time, x,x, y,y , p,signed_product);
         
         // Apply test cases (8-bit unsigned numbers)
                 // Test Case 1: 5 * 3
-        x = 9'b000000101;  y = 9'b000000011;  #10;
-        
-        // Test Case 2: 15 * 5
-        x = 9'b000001111;  y = 9'b000000101;  #10;
-        
-        // Test Case 3: 20 * 4
-        x = 9'b000010100;  y = 9'b000000100;  #10;
-        
-        // Test Case 4: 8 * 2
-        x = 9'b000001000;  y = 9'b000000010;  #10;
-        
-        // Test Case 5: 50 * 7
-        x = 9'b000110010;  y = 9'b000000111;  #10;
-        
-        // Test Case 6: 25 * 6
-        x = 9'b000011001;  y = 9'b000000110;  #10;
-        
-        // Test Case 7: 129 * 65
-        x = 9'b010000001;  y = 9'b001000001;  #10;
-        
-        // Test Case 8: 0 * 18
-        x = 9'b000000000;  y = 9'b000010010;  #10;
-        
-        // Test Case 9: 1 * 1
-        x = 9'b000000001;  y = 9'b000000001;  #10;
-        
-        // Test Case 10: 253 * 253
-        x = 9'b011111101;  y = 9'b011111101;  #10;
+        x = 9'd5;  y = 9'd3;  #10;
+        x = 9'd15; y = 9'd5;  #10;
+        x = 9'd20; y = 9'd4;  #10;
+        x = 9'd8;  y = 9'd2;  #10;
+        x = 9'd50; y = 9'd7;  #10;
+        x = 9'd25; y = 9'd6;  #10;
+        x = 9'd129; y = 9'd65;  #10;
+        x = 9'd0;  y = 9'd18; #10;
+        x = 9'd1;  y = 9'd1;  #10;
+        x = 9'd255; y = 9'd255; #10;
 
-
-
-                // Test Case 1: 5 * 3
-        x = 9'b100000101;  y = 9'b000000011;  #10;
-        
-        // Test Case 2: 15 * 5
-        x = 9'b000001111;  y = 9'b100000101;  #10;
-        
-        // Test Case 3: 20 * 4
-        x = 9'b100010100;  y = 9'b100000100;  #10;
-        
-        // Test Case 4: 8 * 2
-        x = 9'b100001000;  y = 9'b000000010;  #10;
-        
-        // Test Case 5: 50 * 7
-        x = 9'b000110010;  y = 9'b100000111;  #10;
-        
-        // Test Case 6: 25 * 6
-        x = 9'b100011001;  y = 9'b100000110;  #10;
-        
-        // Test Case 7: 129 * 65
-        x = 9'b110000001;  y = 9'b001000001;  #10;
-        
-        // Test Case 8: 0 * 18
-        x = 9'b000000000;  y = 9'b000010010;  #10;
-        
-        // Test Case 9: 1 * 1
-        x = 9'b000000001;  y = 9'b100000001;  #10;
-        
-        // Test Case 10: 253 * 253
-        x = 9'b111111101;  y = 9'b111111101;  #10;
+        // x = -9'd5;  y = 9'd3;  #10;
+        // x = 9'd15; y = -9'd5;  #10;
+        // x = -9'd20; y = -9'd4;  #10;
+        // x = -9'd8;  y = 9'd2;  #10;
+        // x = 9'd50; y = -9'd7;  #10;
+        // x = -9'd25; y = -9'd6;  #10;
+        // x = -9'd129; y = 9'd65;  #10;
+        // x = 9'd0;  y = -9'd18; #10;
+        // x = -9'd1;  y = -9'd1;  #10;
+        // x = -9'd255; y = 9'd255; #10;
 
         // End simulation
         $finish;
     end
-
-    // Always block to update signed values
-    // always @(*) begin
-    //     signed_in1 = $signed(x);
-    //     signed_in2 = $signed(y);
-        // signed_product = $signed(p);
-    // end
-    
+    always @(*) begin
+        signed_product=({17{p[16]}}^p)+p[16];
+    end   
 endmodule

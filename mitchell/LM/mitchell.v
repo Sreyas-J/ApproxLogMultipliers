@@ -253,7 +253,10 @@ module MITCHEL(
     input [8:0] y,
     output [16:0] p
 
-    // output [7:0] A,B,
+    // output prod_sign,
+    // output [15:0] tmp_out,
+
+    // output [7:0] A,B
     // output [7:0] LODa,LODb,
     // output [2:0] kA, kB,   // Expose kA and kB
     // output [10:0] op1, op2, L,  // Expose internal values
@@ -261,8 +264,8 @@ module MITCHEL(
     );
 
     wire [7:0] A,B;
-    assign A=x[7:0];
-    assign B=y[7:0];
+    assign A=x^{8{x[8]}};
+    assign B=y^{8{y[8]}};
 
     wire [7:0] LODa,LODb;
     wire [2:0] kA,kB;
@@ -314,12 +317,12 @@ module MITCHEL(
 	wire [15:0] tmp_sign;
 	
 	assign prod_sign = x[8] ^ y[8];
-	assign tmp_sign = {17{prod_sign}} ^ tmp_out;
+	assign tmp_sign = {16{prod_sign}} ^ tmp_out;
 	
 	// is zero 
 	wire not_zero;
 	assign not_zero = (~zeroA | x[8] | x[0]) & (~zeroB | y[8] | y[0]);
 	
-	assign p = not_zero ? tmp_sign : 16'b0;
+	assign p = not_zero ? {prod_sign,tmp_sign} : 17'b0;
 
 endmodule
