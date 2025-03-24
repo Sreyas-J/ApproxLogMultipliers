@@ -63,7 +63,7 @@ int mitchell_multiply(int a, int b) {
 
 int main() {
     // Example test cases
-    int test_cases[][2] = {{5, 3}, {15, 5}, {20, 4}, {8, 2}, {50, 7}, {25, 6}, {0, 18}, {1, 1},{253,253}};
+    int test_cases[][2] = {{5, 3}, {15, 5}, {20, 4}, {8, 2}, {50, 7}, {25, 6}, {0, 18}, {1, 1},{129,65},{255,255}};
     
     for (auto& tc : test_cases) {
         int a = tc[0], b = tc[1];
@@ -71,10 +71,10 @@ int main() {
         int mitchell_result = mitchell_multiply(a, b);
         float error = 100.0f * (mitchell_result - exact) / exact;
 
-        cout << "Multiplying " << a << " × " << b << ":\n";
-        cout << "  Exact: " << exact << "\n";
+        cout << "Multiplying " << a << " × " << b;
+        // cout << "  Exact: " << exact << "\n";
         cout << "  Mitchell Approximation: " << mitchell_result << "\n";
-        cout << "  Error: " << error << "%\n\n";
+        // cout << "  Error: " << error << "%\n\n";
     }
     
     return 0;

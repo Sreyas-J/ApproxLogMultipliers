@@ -130,6 +130,7 @@ module AntiLog(
     assign enc = ~data_i[9:7];  // Compute correct right-shift amount
 
     wire [7:0] r_out;
+
     Barrel8R Rshift (
         .data_i(r_in),
         .shift_i(enc),
@@ -137,7 +138,6 @@ module AntiLog(
     );
     
     assign data_o = data_i[10] ? l1_out : {8'd0, r_out};  // Full selection
-
 endmodule
 
 
@@ -168,7 +168,7 @@ module Muxes2in1Array4(
     );
 
     assign data_o = select_i ? data_i : 4'b0000;
-
+    
 endmodule
 
 

@@ -31,7 +31,7 @@ module ILM_tb;
                  $time, signed_in1, signed_in2, signed_product);
         
         // Apply test cases (8-bit unsigned numbers)
-        in1 = 9'd5;  in2 = 8'd3;  #10;
+        in1 = -9'd8;  in2 = 9'd9;  #10;
         in1 = 9'd15; in2 = 8'd5;  #10;
         in1 = 9'd20; in2 = 8'd4;  #10;
         in1 = 9'd8;  in2 = 8'd2;  #10;
