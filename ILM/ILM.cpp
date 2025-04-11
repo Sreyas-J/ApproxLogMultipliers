@@ -35,6 +35,20 @@ int nearestPowerOfTwo(int N) {
 
 int logmult(int A, int B){
 
+    int sign1, sign2;
+    sign1 = 1;
+    sign2 = 1;
+
+    if(A<0){
+
+        sign1 = -1;
+        A = -A;
+    }
+    if(B < 0){
+        sign2 = -1;
+        B = -B;
+    }
+
     int two_p_k1, two_p_k2;
     two_p_k1 = nearestPowerOfTwo(A);
     two_p_k2 = nearestPowerOfTwo(B);
@@ -84,6 +98,8 @@ int logmult(int A, int B){
     int product;
     product = dec_out + pp1 + pp2;
 
+    product = sign1*sign2*product;
+
     return product;
 
 
@@ -92,8 +108,8 @@ int logmult(int A, int B){
 
 int main(){
 
-    int A[] = {5,15,20,8,50,25,129,0,1,-8};
-    int B[] = {3,5,4,2,7,6,65,18,1,9};
+    int A[] = {5,15,-20,9,50,25,129,0,1,255};
+    int B[] = {3,5,-4,-8,-3,6,-65,18,1,255};
 
     int i;
     int out;
@@ -104,8 +120,8 @@ int main(){
 
     }
 
-    // int A = 0;
-    // int B = 18;
+    // int A = 9;
+    // int B = -8;
     // int prod;
     // prod = logmult(A,B);
     // cout<<prod<<endl;
