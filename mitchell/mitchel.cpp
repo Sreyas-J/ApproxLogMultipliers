@@ -1,6 +1,7 @@
 #include <iostream>
 #include <bit>   // For std::countl_zero (C++20)
 #include <cmath> // For std::abs
+#include <bitset>
 
 using namespace std;
 
@@ -17,7 +18,7 @@ Log compute_log(int n) {
     // Extract magnitude (8 bits)
     uint8_t magnitude = abs(n);
     
-    int lz = countl_zero(static_cast<uint32_t>(magnitude)) - 24; // Ensure correct leading zero count for 8-bit numbers
+    int lz = __builtin_clz(static_cast<uint32_t>(magnitude)) - 24; // Ensure correct leading zero count for 8-bit numbers
     int k = 7 - lz;
     
     if (k < 0) return {0, 0.0f}; // Edge case for very small numbers
@@ -52,18 +53,19 @@ int mitchell_multiply(int a, int b) {
     // Apply Mitchell's formula based on sum of mantissas
     if (x_sum < 1.0f) {
         // p' = 2^(k1+k2) * (1 + x1 + x2)
-        result = static_cast<int>((1 << (k1 + k2)) * (1.0f + x_sum) + 0.5f);
+        result = static_cast<int>((1 << (k1 + k2)) * (1.0f + x_sum));
     } else {
         // p' = 2^(1+k1+k2) * (x1 + x2)
-        result = static_cast<int>((1 << (1 + k1 + k2)) * (x_sum) + 0.5f);
+        result = static_cast<int>((1 << (1 + k1 + k2)) * (x_sum));
     }
 
+    cout<<"L: "<< bitset<11>(result)<<" op1: "<<bitset<11>(x1);
     return result_sign ? -result : result;
 }
 
 int main() {
     // Example test cases
-    int test_cases[][2] = {{5, 3}, {15, 5}, {20, 4}, {8, 2}, {50, 7}, {25, 6}, {0, 18}, {1, 1},{129,65},{255,255}};
+    int test_cases[][2] = {{-27, 119}, {15, 5}, {20, 4}, {8, 2}, {50, 7}, {25, 6}, {0, 18}, {1, 1},{129,65},{255,255}};
     
     for (auto& tc : test_cases) {
         int a = tc[0], b = tc[1];

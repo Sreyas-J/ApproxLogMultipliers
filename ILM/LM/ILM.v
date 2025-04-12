@@ -1,15 +1,26 @@
 module Decoder (
-    input [15:0] in,
-    output reg [15:0] out
+    input [3:0] in,
+    output reg [14:0] out
 );
 
     always @(*) begin
-    out = 16'b0;
+    out = 14'b0;
     out[in] = 1'b1;
 end
     
 endmodule
 
+module a_greater_than_or_equal_b_13to0(input[13:0] in1,input[13:0] in2,output select);
+wire [13:0] difference = in1-in2;
+wire sign_of_difference = difference[13];
+assign select = sign_of_difference? 0:1;
+endmodule
+
+module a_greater_than_or_equal_b_7to0(input[7:0] in1,input[7:0] in2,output select);
+wire [7:0] difference = in1-in2;
+wire sign_of_difference = difference[7];
+assign select = sign_of_difference? 0:1;
+endmodule
 
 module PropFA (
     input a,
@@ -39,23 +50,33 @@ endmodule
 
 module Propadder(
 
-    input [15:0] A,
-    input [15:0] B,
+    input [14:0] A,
+    input [14:0] B_inp,
+    input sign_B,
     input cin,
-    output [16:0] sum,
+    output [14:0] sum,
     output cout
 
 );
-
-    wire [15:0] inter_cout;
-    assign sum[16] = 0;
+    reg [14:0] B_reg;
+    wire [14:0] B;
+    always@(*)
+    begin
+        if(sign_B == 1)
+            B_reg <= -B_inp;//2's complement is taken and A-B is done. 
+        else
+            B_reg <= B_inp;//If sign3=0, A+B is done so no change.
+    end
+    assign B = B_reg;
+    wire [14:0] inter_cout;
+    // assign sum[16] = 0;
 
     PropFA PFA1(A[0],B[0],cin,sum[0],inter_cout[0]);
 
     genvar i;
     generate
 
-        for(i = 1; i<16; i = i+1)
+        for(i = 1; i<15; i = i+1)
         begin
 
             PropFA PFA2(A[i], B[i], inter_cout[i-1], sum[i], inter_cout[i]);
@@ -64,15 +85,15 @@ module Propadder(
 
     endgenerate
 
-    assign cout = inter_cout[15];
+    assign cout = inter_cout[14];
 
 
 endmodule
 
 module threebit_adder(
-    input [15:0] a,
-    input [15:0] b,
-    output [15:0] sum
+    input [2:0] a,
+    input [2:0] b,
+    output [3:0] sum
 );
 
     assign sum = a + b;
@@ -82,20 +103,73 @@ endmodule
 
 
 module eightbit_adder(
-    input [15:0] a,
-    input [15:0] b,
-    output [15:0] sum
+    input [13:0] a,
+    input sign1,
+    input [13:0] b,
+    input sign2,
+    output [14:0] sum,
+    output sign3
 
 );
-    assign sum = a+b;
+    wire a_bigger_than_b;
+    reg sign3_reg;
+    reg [14:0] sum_reg;
+    a_greater_than_or_equal_b_13to0 comp1(a,b,a_bigger_than_b);
+    always@(*)
+    begin
+        if(sign1 == 0)
+        begin
+            if(sign2 == 0)
+            begin
+                sign3_reg<=0;
+                sum_reg <= a+b;
+            end
+            else
+            begin
+                if(a_bigger_than_b)
+                begin
+                    sign3_reg<= 0;
+                    sum_reg <= a-b;
+                end
+                else
+                begin
+                    sign3_reg<=1;
+                    sum_reg <= b-a;
+                end
+            end
+        end
+        else
+        begin
+            if(sign2 == 0)
+            begin
+                if(a_bigger_than_b == 0)
+                begin
+                    sign3_reg<=0;
+                    sum_reg <= b-a;
+                end
+                else
+                begin
+                    sign3_reg<=1;
+                    sum_reg <= a-b;
+                end
+            end
+            else
+            beginDecoder
+                sign3_reg<=1;
+                sum_reg <= a+b;
+            end
+        end
+    end
+    assign sign3 = sign3_reg;
+    assign sum = sum_reg;
 
 endmodule
 
 module shifter(
 
-    input [15:0] q,
-    input [15:0] k,
-    output [15:0] shift
+    input [7:0] q,
+    input [2:0] k,
+    output [13:0] shift
 
 );
 
@@ -107,24 +181,40 @@ endmodule
 module subtractor(
 
     input [7:0] a,
-    input [15:0] b,
-    output [15:0] sub
+    input [7:0] b,
+    output [7:0] sub,
+    output sign
 
 );
-
-    assign sub = a-b;
-
+    wire a_bigger_than_b;
+    reg sign_reg;
+    reg [7:0] sub_reg;
+    a_greater_than_or_equal_b_7to0 comp2(a,b,a_bigger_than_b);
+    always@(*)
+    begin
+        if(a_bigger_than_b == 1)
+        begin
+            sign_reg <= 0;
+            sub_reg <= a-b;
+        end
+        else
+        begin
+            sign_reg <= 1;
+            sub_reg <= b-a; //Takes 2's complement of the number by default(if we do a-b)
+        end
+    end
+    assign sign = sign_reg;
+    assign sub = sub_reg;
 endmodule
 
 
 
 module NOD (
     input [7:0] A,
-    output [15:0] O
+    output [7:0] O
 );
 
 
-    assign O[15:8] = 0;
     wire [5:0]t;
     wire [6:0] invert;
     wire [3:0] temp1;
@@ -184,11 +274,11 @@ endmodule
 
 
 module PEncoder (
-    input [15:0] A,
-    output [15:0] out
+    input [7:0] A,
+    output [2:0] out
 );
 
-    assign out[15:3] = 0;
+    
     wire temp1, temp2, temp3, temp4, temp5;
 
     assign temp1 = A[1] || A[3];
@@ -207,8 +297,8 @@ module ILM(
 
     input [8:0] in1,
     input [8:0] in2,
-    //  output sign,
-    output [16:0] product,
+    output sign,
+    output [16:0] product, //magnitude
     output carry
 
 );
@@ -217,39 +307,40 @@ module ILM(
      assign A = in1[7:0];
      assign B = in2[7:0];
 
-    //  assign sign = in1[8] ^ in2[8];
+     assign sign = in1[8] ^ in2[8];
 
-    wire [15:0] NOD_out1, NOD_out2;
+    wire [7:0] NOD_out1, NOD_out2;
     
     NOD n1(A,NOD_out1);
     NOD n2(B,NOD_out2);
 
-    wire [15:0] q1, q2;
-    subtractor s1(A, NOD_out1, q1);
-    subtractor s2(B, NOD_out2, q2);
+    wire [7:0] q1, q2;
+    wire sign1,sign2,sign3;
+    subtractor s1(A, NOD_out1, q1,sign1);
+    subtractor s2(B, NOD_out2, q2,sign2);
 
-    wire [15:0] k1, k2;
+    wire [2:0] k1, k2;
     PEncoder p1(NOD_out1, k1);
     PEncoder p2(NOD_out2, k2);
 
-    wire [15:0] sum_k;
+    wire [3:0] sum_k;
     threebit_adder ts1(k1, k2, sum_k);
 
-    wire [15:0] two_pq1, two_pq2;
+    wire [13:0] two_pq1, two_pq2;
     shifter shift1(q1,k2,two_pq1);
     shifter shift2(q2, k1, two_pq2);
 
-    wire [15:0] intermediate;
+    wire [14:0] intermediate;
     Decoder d(sum_k, intermediate);
 
-    wire [15:0] intermediate2;
-    eightbit_adder sa(two_pq1, two_pq2, intermediate2 );
+    wire [14:0] intermediate2;
+    eightbit_adder sa(two_pq1,sign1, two_pq2,sign2, intermediate2,sign3 );//change this to use sign in it
     
-    wire [16:0] inter_prod;
+    wire [14:0] inter_prod;
     wire cout;
-    Propadder padd(intermediate, {intermediate2}, 1'b0, inter_prod, cout);
+    Propadder padd(intermediate, {intermediate2},sign3, 1'b0, inter_prod, cout);
 
-    assign product = inter_prod;
+    assign product = {sign,cout,inter_prod};
     assign carry = cout;
 
 

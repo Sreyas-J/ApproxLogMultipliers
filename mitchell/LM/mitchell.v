@@ -47,22 +47,22 @@ module Barrel16L(
  
    always @*
       case (shift_i)
-         4'd0: data_o = data_i;
-         4'd1: data_o = data_i << 1;
-         4'd2: data_o = data_i << 2;
-         4'd3: data_o = data_i << 3;
-         4'd4: data_o = data_i << 4;
-         4'd5: data_o = data_i << 5;
-         4'd6: data_o = data_i << 6;
-         4'd7: data_o = data_i << 7;
-         4'd8: data_o = data_i<<8;
-         4'd9: data_o = data_i << 9;
-         4'd10: data_o = data_i << 10;
-         4'd11: data_o = data_i << 11;
-         4'd12: data_o = data_i << 12;
-         4'd13: data_o = data_i << 13;
-         4'd14: data_o = data_i << 14;
-         4'd15: data_o = data_i << 15;
+         4'd0: data_o = data_i<<1;
+         4'd1: data_o = data_i << 2;
+         4'd2: data_o = data_i << 3;
+         4'd3: data_o = data_i << 4;
+         4'd4: data_o = data_i << 5;
+         4'd5: data_o = data_i << 6;
+         4'd6: data_o = data_i << 7;
+         4'd7: data_o = data_i << 8;
+         4'd8: data_o = data_i<<9;
+         4'd9: data_o = data_i << 10;
+         4'd10: data_o = data_i << 11;
+         4'd11: data_o = data_i << 12;
+         4'd12: data_o = data_i << 13;
+         4'd13: data_o = data_i << 14;
+         4'd14: data_o = data_i << 15;
+         4'd15: data_o = data_i << 16;
       endcase
 
 endmodule
@@ -103,20 +103,20 @@ module AntiLog(
     wire [15:0] l1_in;
     assign l1_in = {8'b0, 1'b1, data_i[6:0]};  // 8 + 1 + 7 = 16 bits
 
-    wire [2:0] k_enc;
-    wire [3:0] k_enc_inc;
+    wire [3:0] k_enc;
+//    wire [3:0] k_enc_inc;
     assign k_enc = {1'b0,data_i[9:7]};  // Extract exponent
     // assign k_enc_inc = k_enc + 3'b001;  // Simple increment
 
-    carry_lookahead_inc inc(
-        .i_add1(k_enc),
-        .o_result(k_enc_inc)
-    );
+//    carry_lookahead_inc inc(
+//        .i_add1(k_enc),
+//        .o_result(k_enc_inc)
+//    );
 
     wire [15:0] l1_out;
     Barrel16L L1shift (
         .data_i(l1_in),
-        .shift_i(k_enc_inc),
+        .shift_i(k_enc),
         .data_o(l1_out)
     );
 
@@ -137,7 +137,11 @@ module AntiLog(
         .data_o(r_out)
     );
     
-    assign data_o = data_i[10] ? l1_out : {8'd0, r_out};  // Full selection
+    
+    wire [7:0] data_msb,data_lsb;
+    assign data_msb= {8{data_i[10]}}&l1_out[15:8];
+    assign data_lsb=data_i[10] ? l1_out[7:0] : r_out; 
+    assign data_o = {data_msb,data_lsb};  // Full selection
 endmodule
 
 
@@ -252,20 +256,11 @@ module MITCHEL(
     input [8:0] x,
     input [8:0] y,
     output [16:0] p
-
-    // output prod_sign,
-    // output [15:0] tmp_out,
-
-    // output [7:0] A,B
-    // output [7:0] LODa,LODb,
-    // output [2:0] kA, kB,   // Expose kA and kB
-    // output [10:0] op1, op2, L,  // Expose internal values
-    // output [15:0] tmp_out 
     );
 
     wire [7:0] A,B;
-    assign A=x^{8{x[8]}};
-    assign B=y^{8{y[8]}};
+    assign A=(x^{9{x[8]}})+{8'b0,x[8]};
+    assign B=(y^{9{y[8]}})+{8'b0,y[8]};
 
     wire [7:0] LODa,LODb;
     wire [2:0] kA,kB;
@@ -314,15 +309,15 @@ module MITCHEL(
 	);
 	
 	wire prod_sign; 
-	wire [15:0] tmp_sign;
+	wire [16:0] tmp_sign;
 	
 	assign prod_sign = x[8] ^ y[8];
-	assign tmp_sign = {16{prod_sign}} ^ tmp_out;
+	assign tmp_sign = ({17{prod_sign}} ^ {1'b0,tmp_out})+{16'b0,prod_sign};
 	
 	// is zero 
 	wire not_zero;
 	assign not_zero = (~zeroA | x[8] | x[0]) & (~zeroB | y[8] | y[0]);
 	
-	assign p = not_zero ? {prod_sign,tmp_sign} : 17'b0;
-
+	assign p = not_zero ? tmp_sign : 17'b0;
+	
 endmodule
