@@ -14,8 +14,8 @@ module mitchell_tb;
     real MED;
 
     // Testbench signals
-    reg [8:0] X,Y;
-    reg [16:0] accurate_p;
+    reg [8:0] X,Y,maxX,maxY;
+    reg [16:0] accurate_p,maxAcc_p,maxProduct;
     wire [16:0] product;
 
     // Instantiate the HOERAA module
@@ -56,7 +56,13 @@ module mitchell_tb;
 
             // Calculate the error distance (absolute difference between accurate and approximate sum)
             error_distance = (product > accurate_p) ? (product - accurate_p) : (accurate_p - product);
-            if(error_distance> max_error) max_error=error_distance;
+            if(error_distance> max_error)begin
+                max_error=error_distance;
+                maxX=X;
+                maxY=Y;
+                maxAcc_p=accurate_p;
+                maxProduct=product;
+            end
             total_error_distance = total_error_distance + error_distance;
 
             // Calculate the relative error if accurate_p is non-zero
@@ -75,6 +81,7 @@ module mitchell_tb;
         $display("Final Average Error (AE) after %0d tests: %0.4f", total_tests,MED) ;
         $display("Final Mean Relative Error Distance (MRED) after %0d tests: %0.4f", total_tests, error_ratio / valid_tests);
         $display("Final Normalized Mean Error Distancee (NMED) after %0d tests: %0.4f",total_tests, MED/max_error);
+        $display("X:%d Y:%d accurateP: %d p:%d, error:%d",maxX,maxY,maxAcc_p,maxProduct,max_error);
 
         // End simulation
         $finish;
