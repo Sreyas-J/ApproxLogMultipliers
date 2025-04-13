@@ -52,17 +52,17 @@ def approxMultiply(a, b):
     
     return -result if result_sign else result
 
-test_cases = [[-27, 119], [15, 5], [20, 4], [8, 2], [50, 7], [25, 6], [0, 18], [1, 1], [129, 65], [255, 255]]
+# test_cases = [[-27, 119], [15, 5], [20, 4], [8, 2], [50, 7], [25, 6], [0, 18], [1, 1], [129, 65], [255, 255]]
 
-for a, b in test_cases:
-    exact = a * b
-    mitchell_result = approxMultiply(a, b)
+# for a, b in test_cases:
+#     exact = a * b
+#     mitchell_result = approxMultiply(a, b)
     
-    print(f"Multiplying {a} × {b}")
-    print(f"  Mitchell Approximation: {mitchell_result}")
+#     print(f"Multiplying {a} × {b}")
+#     print(f"  Mitchell Approximation: {mitchell_result}")
     
-    if exact != 0:
-        error = 100.0 * (mitchell_result - exact) / exact
-        print(f"  Error: {error}%\n")
-    else:
-        print("\n")
+#     if exact != 0:
+#         error = 100.0 * (mitchell_result - exact) / exact
+#         print(f"  Error: {error}%\n")
+#     else:
+#         print("\n")

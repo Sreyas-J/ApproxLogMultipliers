@@ -1,81 +1,65 @@
-#include <iostream>
-#include <bit>   // For std::countl_zero (C++20)
-#include <cmath> // For std::abs
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 
-using namespace std;
+#define MAX_NUM (1 << 8)   // 8-bit input
+#define MAX_NUM1 (1 << 7)  // For 7-bit shifting
 
-// Structure to hold the logarithm components
-struct Log {
-    int k;    // Characteristic (exponent)
-    float x;  // Mantissa (fractional part)
-};
-
-// Compute approximate binary logarithm of an 8-bit magnitude with sign bit
-Log compute_log(int n) {
-    if (n == 0) return {0, 0.0f}; // Handle zero case
-    
-    // Extract magnitude (8 bits)
-    uint8_t magnitude = abs(n);
-    
-    int lz = countl_zero(static_cast<uint32_t>(magnitude)) - 24; // Ensure correct leading zero count for 8-bit numbers
-    int k = 7 - lz;
-    
-    if (k < 0) return {0, 0.0f}; // Edge case for very small numbers
-
-    float x = (static_cast<float>(magnitude) / (1 << k)) - 1.0f; // Mantissa calculation
-
-    return {k, x};
+unsigned char leadingBitPosition(unsigned char val) {    
+    if (val == 0) return -1; // Edge case for zero
+    return 7 - (__builtin_clz(val) - 24); // Adjust for 8-bit values
 }
 
-// alm_soa logarithmic multiplication for 9-bit signed numbers (8-bit magnitude + 1 sign bit)
-int alm_soa_multiply(int a, int b) {
-    if (a == 0 || b == 0) return 0; // Handle zero multiplication
+short ALM_SOA(short a, short b, unsigned short w) {
+    if (a == 0 || b == 0) return 0;
 
-    // Handle signs
-    bool sign_a = a < 0;
-    bool sign_b = b < 0;
-    bool result_sign = sign_a != sign_b;
-    
-    // Compute logarithms
-    Log log_a = compute_log(a);
-    Log log_b = compute_log(b);
+    // Extract magnitude (only the lower 8 bits)
+    unsigned char a_abs = abs(a) & 0xFF;
+    unsigned char b_abs = abs(b) & 0xFF;
 
-    // Sum characteristics and mantissas
-    int k1 = log_a.k;
-    int k2 = log_b.k;
-    float x1 = log_a.x;
-    float x2 = log_b.x;
-    
-    float x_sum = x1 + x2;
-    int result;
-    
-    // Apply alm_soa's formula based on sum of mantissas
-    if (x_sum < 1.0f) {
-        // p' = 2^(k1+k2) * (1 + x1 + x2)
-        result = static_cast<int>((1 << (k1 + k2)) * (1.0f + x_sum) + 0.5f);
-    } else {
-        // p' = 2^(1+k1+k2) * (x1 + x2)
-        result = static_cast<int>((1 << (1 + k1 + k2)) * (x_sum) + 0.5f);
-    }
+    unsigned char k_a = leadingBitPosition(a_abs);
+    unsigned char x_a = a_abs << (7 - k_a);
 
-    return result_sign ? -result : result;
+    unsigned char k_b = leadingBitPosition(b_abs);
+    unsigned char x_b = b_abs << (7 - k_b);
+
+    unsigned char tmp = (1 << 7) - 1;
+    unsigned char tmp_prim = (1 << w) - 1;
+    unsigned char tmp_sec = (1 << (w - 1));
+
+    unsigned char y_a = x_a & tmp;
+    unsigned char y_b = x_b & tmp;
+
+    // Truncation
+    unsigned char y_a_trunc = (tmp - tmp_prim) & y_a;
+    unsigned char y_b_trunc = (tmp - tmp_prim) & y_b;
+
+    unsigned char carry_in = ((y_a & y_b) & (tmp_sec)) * 2;
+    unsigned char y_l = (y_a_trunc + y_b_trunc + carry_in) | tmp_prim;
+
+    unsigned char k_l = k_a + k_b + (((y_l) & (tmp + 1)) >> 7);
+    y_l = y_l & tmp;
+
+    double m = (double)y_l / (1 << 7);
+    short p_abs = (short)((1 + m) * (1 << k_l));
+
+    return p_abs; // Final result uses only magnitude
 }
 
 int main() {
-    // Example test cases
-    int test_cases[][2] = {{5, 3}, {15, 5}, {20, 4}, {8, 2}, {50, 7}, {25, 6}, {0, 18}, {1, 1},{253,253}};
-    
-    for (auto& tc : test_cases) {
-        int a = tc[0], b = tc[1];
-        int exact = a * b;
-        int alm_soa_result = alm_soa_multiply(a, b);
-        float error = 100.0f * (alm_soa_result - exact) / exact;
+    short x[] = {-256, -130, 100, -64, 38, -200, -16, 255, -128, 50};
+    short y[] = {-200, 10, 150, 0, 27, 33, -12, 1, -1, 25};
+    int i;
+    short p;
+    unsigned short w = 3;
 
-        cout << "Multiplying " << a << " × " << b << ":\n";
-        cout << "  Exact: " << exact << "\n";
-        cout << "  alm_soa Approximation: " << alm_soa_result << "\n";
-        cout << "  Error: " << error << "%\n\n";
+    FILE *log = fopen("mult_log_9bit.txt", "w");
+    for (i = 0; i < 10; i++) {
+        p = ALM_SOA(x[i], y[i], w);
+        printf("x = %d, y = %d, p = %d, exact = %d\n", x[i], y[i], p, abs(x[i]) * abs(y[i]));
+        fprintf(log, "x = %d, y = %d, p = %d, exact = %d\n", x[i], y[i], p, abs(x[i]) * abs(y[i]));
     }
-    
+
+    fclose(log);
     return 0;
 }
