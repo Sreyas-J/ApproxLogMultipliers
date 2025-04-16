@@ -18,7 +18,7 @@ module Barrel8L(
 
 endmodule
 
-
+ 
 module Barrel8R (
     input [7:0] data_i,
 	input [2:0] shift_i,

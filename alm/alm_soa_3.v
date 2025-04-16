@@ -136,7 +136,11 @@ module AntiLog(
         .data_o(r_out)
     );
     
-    assign data_o = data_i[10] ? l1_out : {8'd0, r_out};  // Full selection
+    // assign data_o = data_i[10] ? l1_out : {8'd0, r_out};  // Full selection
+    wire [7:0] data_msb,data_lsb;
+    assign data_msb= {8{data_i[10]}}&l1_out[15:8];
+    assign data_lsb=data_i[10] ? l1_out[7:0] : r_out; 
+    assign data_o = {data_msb,data_lsb};  // Full selection
 
 endmodule
 

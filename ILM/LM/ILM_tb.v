@@ -41,6 +41,7 @@ module ILM_tb;
         in1 = 9'd0;  in2 = 8'd18; #10;
         in1 = 9'd1;  in2 = 8'd1;  #10;
         in1 = 9'd255; in2 = 8'd255; #10;
+        in1= 9'd96; in2=9'd159; #10
 
         // End simulation
         $finish;

@@ -154,7 +154,7 @@ module eightbit_adder(
                 end
             end
             else
-            beginDecoder
+            begin
                 sign3_reg<=1;
                 sum_reg <= a+b;
             end
