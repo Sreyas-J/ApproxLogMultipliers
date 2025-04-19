@@ -1,16 +1,11 @@
 `timescale 1ns/10ps
 
-
-
 module carry_prop_gen(p, g, a, b);
     output [3:0] p, g;   
     input [3:0] a, b;     
     assign p = a ^ b;
     assign g = a & b;
 endmodule
-
-
-
 
 module carry(c1, c2, p, g, c0);
     output c1, c2;      
@@ -20,9 +15,6 @@ module carry(c1, c2, p, g, c0);
     assign c2 = g[1] | (g[0] & p[1]) | (c0 & p[0] & p[1]);
 
 endmodule
-
-
-
 
 module cla_4bit(sum, ps, gs, a, b, c0);
     output [3:0] sum;     
@@ -41,7 +33,6 @@ module cla_4bit(sum, ps, gs, a, b, c0);
     sum s1(.s(sum), .p(p), .c({c3, c2, c1, c0}));
 endmodule
 
-
 module carry_2(c1, c2, c3, p, g, c0);
     output c1, c2, c3;   
     input [3:0] p, g;   
@@ -51,8 +42,6 @@ module carry_2(c1, c2, c3, p, g, c0);
     assign c2 = g[1] | g[0]&p[1] | c0&p[0]&p[1];
     assign c3 = g[2] | g[1]&p[2] | g[0]&p[1]&p[2] | c0&p[0]&p[1]&p[2];
 endmodule 
-
-
 
 module cla_8bit(sum, c8, a, b, c0);
     output [7:0] sum;      
@@ -68,11 +57,6 @@ module cla_8bit(sum, c8, a, b, c0);
     cla_4bit c4b2(.sum(sum[7:4]), .ps(ps[1]), .gs(gs[1]), .a(a[7:4]), .b(b[7:4]), .c0(c4));
     carry c1(.c1(c4), .c2(c8), .p(ps), .g(gs), .c0(c0));
 endmodule
-
-
-
-
-
 
 module full_adder(sum, cout, a, b, cin);
 

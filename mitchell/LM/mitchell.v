@@ -259,8 +259,8 @@ module MITCHEL(
     );
 
     wire [7:0] A,B;
-    assign A=x^{9{x[8]}};
-    assign B=y^{9{y[8]}};
+    assign A=x[7:0];
+    assign B=y[7:0];
 
     wire [7:0] LODa,LODb;
     wire [2:0] kA,kB;
@@ -312,7 +312,8 @@ module MITCHEL(
 	wire [16:0] tmp_sign;
 	
 	assign prod_sign = x[8] ^ y[8];
-	assign tmp_sign = {17{prod_sign}} ^ {1'b0,tmp_out};
+	// assign tmp_sign = {17{prod_sign}} ^ {1'b0,tmp_out};
+    assign tmp_sign={1'b0,tmp_out};
 	
 	// is zero 
 	wire not_zero;
