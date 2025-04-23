@@ -324,3 +324,46 @@ module MITCHEL(
 	assign p = not_zero ? tmp_sign : 17'b0;
 	
 endmodule
+
+
+// =================================================================
+// 3-input artificial neuron using ALM-SOA multipliers
+// Truncation needs to be considered in the implementation
+// of the artificial neuron. Eight-bit precision is used for each
+// of the three inputs and their corresponding synaptic weights
+// and, therefore, the multiplication products would be 16-bit.
+// However, since the output will be connected to another layer
+// of neurons, truncation to 8 bits is required. The truncation is
+// done by performing hard-limiting, i.e., using the maximum
+// 8-bit number (-127 or 127) for all output values that need
+// more than 8-bit precision
+// =================================================================
+module artificial_neuron (
+    input  signed [7:0] x1,
+    input  signed [7:0] x2,
+    input  signed [7:0] x3,
+    output reg signed [7:0] y
+);
+    // fixed synaptic weights
+    wire signed [8:0] W1 = 9'sd4;
+    wire signed [8:0] W2 = -9'sd13;
+    wire signed [8:0] W3 = 9'sd8;
+
+    // ALM-SOA partial products (17-bit signed)
+    wire signed [16:0] p1, p2, p3;
+    MITCHEL mul1(.x({x1[7],x1}), .y(W1), .p(p1));
+    MITCHEL mul2(.x({x2[7],x2}), .y(W2), .p(p2));
+    MITCHEL mul3(.x({x3[7],x3}), .y(W3), .p(p3));
+
+    // accumulator for sum of partial products
+    wire signed [18:0] sum;
+    assign sum=p1+p2+p3;
+
+    // sum and hard-limiting truncation
+    always @(*) begin
+        // clamp to signed 8-bit range [-127..127]
+        if (sum >  127)      y =  127;
+        else if (sum < -127) y = -127;
+        else                 y = sum[7:0];
+    end
+endmodule
