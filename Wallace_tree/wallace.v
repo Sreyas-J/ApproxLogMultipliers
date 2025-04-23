@@ -1,5 +1,34 @@
-module wallaceTreeMultiplier8Bit (output[15:0] result, input[7:0] a, input[7:0] b);
+Can you update this in github
 
+module wallaceTreeMultiplier8Bit (
+    input [8:0] a, // signed input (MSB is sign)
+    input [8:0] b, // signed input (MSB is sign)
+    output [16:0] result // signed 17-bit result
+);
+
+    wire [7:0] a_abs = a[8] ? (~a[7:0] + 1'b1) : a[7:0]; // two's complement if negative
+    wire [7:0] b_abs = b[8] ? (~b[7:0] + 1'b1) : b[7:0]; // two's complement if negative
+    wire [15:0] unsigned_result;
+
+    // Use the unsigned Wallace tree on absolute values
+    wallaceTreeMultiplier8Bit_unsigned core_mul (
+        .result(unsigned_result),
+        .a(a_abs),
+        .b(b_abs)
+    );
+
+    // Determine if result should be negative
+    wire sign = a[8] ^ b[8];
+
+    // Apply two's complement to result if negative
+    wire [15:0] result_signed = sign ? (~unsigned_result + 1'b1) : unsigned_result;
+
+    // Concatenate sign with magnitude
+    assign result = {sign, result_signed};
+
+endmodule
+
+module wallaceTreeMultiplier8Bit_unsigned (output [15:0] result, input [7:0] a, input[7:0] b);
     reg[7:0] wallaceTree[7:0];
     integer i, j;
 

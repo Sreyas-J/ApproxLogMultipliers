@@ -1,5 +1,5 @@
 module ALM_SOA #(
-    parameter W = 3,
+    parameter W = 5,
     parameter N = 16,
     parameter TMP = (1 << (N-1)) - 1,      // 32767
     parameter TMP_PRIM = (1 << W) - 1,       // 7 for W=3
