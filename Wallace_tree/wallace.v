@@ -1,5 +1,3 @@
-Can you update this in github
-
 module wallaceTreeMultiplier8Bit (
     input [8:0] a, // signed input (MSB is sign)
     input [8:0] b, // signed input (MSB is sign)
